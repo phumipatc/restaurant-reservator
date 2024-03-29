@@ -13,6 +13,8 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+app.use('/api/v1/restaurants', require('./routes/restaurants'));
+
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(
