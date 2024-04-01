@@ -35,21 +35,38 @@ exports.login = async (req, res, next) => {
 	}
 
 	// Check for user
-	const user = await User.findOne({ email }).select('+password');
-	if (!user) {
-		return res.status(401).json({ success: false, error: 'Invalid credentials' });
-	}
+	try {
+		const user = await User.findOne({ email }).select('+password');	
 
-	// Check if password matches
-	const isMatch = await user.matchPassword(password);
-	if (!isMatch) {
-		return res.status(401).json({ success: false, error: 'Invalid credentials' });
+		if (!user) {
+			return res.status(401).json({ success: false, error: 'Invalid credentials' });
+		}
+		
+		// Check if password matches
+		const isMatch = await user.matchPassword(password);
+		if (!isMatch) {
+			return res.status(401).json({ success: false, error: 'Invalid credentials' });
+		}
+	
+		// Create token
+		// const token = user.getSignedJwtToken();
+		// res.status(200).json({ success: true, token });
+		sendTokenResponse(user, 200, res);
+	} catch (err) {
+		return res.status(401).json({ success: false, error: 'Cannot convert email or password to string' });
 	}
+}
 
-	// Create token
-	// const token = user.getSignedJwtToken();
-	// res.status(200).json({ success: true, token });
-	sendTokenResponse(user, 200, res);
+//@desc		Logout user / clear cookie
+//@route	GET /api/v1/auth/logout
+//@access	Private
+exports.logout = async (req, res, next) => {
+	res.cookie('token', 'none', {
+		expires: new Date(Date.now() + 10 * 1000),
+		httpOnly: true
+	});
+
+	res.status(200).json({ success: true, data: {} });
 }
 
 const sendTokenResponse = (user, statusCode, res) => {
