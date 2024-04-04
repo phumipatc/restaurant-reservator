@@ -6,6 +6,9 @@ const restaurantController = require('../controllers/restaurants');
 
 const router = express.Router();
 
+const appointmentRouter = require('./appointments');
+
+router.use('/:restaurantId/appointments', appointmentRouter);
 router
 	.route('/')
 	.get(restaurantController.getRestaurants)

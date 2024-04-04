@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 
 const restaurantsRouter = require('./routes/restaurants');
 const authRouter = require('./routes/auth');
+const reservationsRouter = require('./routes/reservations');
 
 dotenv.config({ path: './config/config.env' });
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/restaurants', restaurantsRouter);
+app.use('/api/v1/reservations', reservationsRouter);
 
 const PORT = process.env.PORT || 5000;
 

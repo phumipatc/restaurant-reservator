@@ -35,6 +35,17 @@ const restaurantSchema = new mongoose.Schema({
 			'Please add a valid time'
 		]
 	},
+}, { 
+    toJSON: {virtuals:true}, 
+    toObject:{virtuals:true} 
+}); 
+
+//Reverse populate with virtuals 
+restaurantSchema.virtual('reservations', { 
+	ref: 'Reservation', 
+	localField: '_id', 
+	foreignField: 'restaurant', 
+	justOne: false 
 });
 
 module.exports = mongoose.model('Restaurant', restaurantSchema);
