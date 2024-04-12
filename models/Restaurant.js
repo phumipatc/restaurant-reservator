@@ -15,7 +15,7 @@ const restaurantSchema = new mongoose.Schema({
 	tel: {
 		type: String,
 		match: [
-			/^\d{3}\d{3}\d{4}$/,
+			/^\d{3}-\d{3}-\d{4}$/,
 			'Please add a valid phone number'
 		]
 	},
@@ -38,7 +38,16 @@ const restaurantSchema = new mongoose.Schema({
 }, { 
     toJSON: {virtuals:true}, 
     toObject:{virtuals:true} 
-}); 
+});
+
+restaurantSchema.pre('deleteOne', {
+	document: true,
+	query: false
+}, async function (next) {
+	console.log(`Reservations being removed from restaurant ${this._id}`);
+	await this.model('Reservation').deleteMany({ restaurant: this._id });
+	next();
+});
 
 //Reverse populate with virtuals 
 restaurantSchema.virtual('reservations', { 
