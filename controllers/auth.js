@@ -103,6 +103,9 @@ exports.getMe = async (req, res, next) => {
 	res.status(200).json({ success: true, data: user });
 }
 
+// @desc	Forgot password
+// @route	POST /api/v1/auth/forgotpassword
+// @access	Public
 exports.forgotPassword = async (req, res, next) => {
 	const { email } = req.body;
 	const user = await User.findOne({ email });
@@ -120,4 +123,26 @@ exports.forgotPassword = async (req, res, next) => {
 	user.password = newPassword;
 
 	await user.save();
+	res.status(200).json({ success: true, data: 'Email sent' });
+}
+
+// @desc	Change password
+// @route	PUT /api/v1/auth/changepassword
+// @access	Private
+exports.changePassword = async (req, res, next) => {
+	const user = await User.findById(req.user.id).select('+password');
+	if (!user) {
+		return res.status(404).json({ success: false, error: 'User not found' });
+	}
+
+	const { currentPassword, newPassword } = req.body;
+
+	// Check current password
+	if (!await user.matchPassword(currentPassword)) {
+		return res.status(401).json({ success: false, error: 'Password is incorrect' });
+	}
+
+	user.password = newPassword;
+	await user.save();
+	sendTokenResponse(user, 200, res);
 }
