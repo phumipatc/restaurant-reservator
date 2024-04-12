@@ -9,4 +9,6 @@ router.route("/:id")
     .get(protect, getReservation)
     .put(protect, authorize('admin', 'user'), updateReservation)
     .delete(protect, authorize('admin', 'user'), deleteReservation);
+router.route("/:id/rating")
+    .put(protect, authorize('admin', 'user'), updateReservation);
 module.exports = router;

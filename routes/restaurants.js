@@ -6,9 +6,9 @@ const restaurantController = require('../controllers/restaurants');
 
 const router = express.Router();
 
-const appointmentRouter = require('./appointments');
+const reservationRouter = require('./reservations');
 
-router.use('/:restaurantId/appointments', appointmentRouter);
+router.use('/:restaurantId/reservations', reservationRouter);
 router
 	.route('/')
 	.get(restaurantController.getRestaurants)
