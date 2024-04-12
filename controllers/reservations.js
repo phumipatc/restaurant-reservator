@@ -1,5 +1,5 @@
-const Reservation = require('../models/reservation');
-const Restaurant = require('../models/restaurant');
+const Reservation = require('../models/Reservation');
+const Restaurant = require('../models/Restaurant');
 
 //@desc		Get all reservations
 //@route	GET /api/v1/reservations
