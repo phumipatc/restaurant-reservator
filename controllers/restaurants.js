@@ -121,11 +121,13 @@ exports.updateRestaurant = async (req, res, next) => {
 //@access	Private
 exports.deleteRestaurant = async (req, res, next) => {
 	try {
-		const restaurant = await Restaurant.findByIdAndDelete(req.params.id);
+		const restaurant = await Restaurant.findById(req.params.id);
 
 		if (!restaurant) {
 			return res.status(400).json({ success: false });
 		}
+
+		await restaurant.deleteOne();
 
 		res.status(200).json({ success: true, data: {} });
 	} catch (err) {
