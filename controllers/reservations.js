@@ -1,5 +1,6 @@
 const Reservation = require('../models/Reservation');
 const Restaurant = require('../models/Restaurant');
+const sendEmail = require('../config/mailer');
 
 //@desc		Get all reservations
 //@route	GET /api/v1/reservations
@@ -82,6 +83,14 @@ exports.createReservation = async (req, res, next) => {
 
         req.body.user = req.user.id;
 
+        // Check if the user's reservation is not in the past (disabled for testing purpose)
+        if (Date.parse(req.body.date) < new Date()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot make a reservation in the past'
+            });
+        }
+
         const existedReservations = await Reservation.find({ 
             user: req.user.id,
             date: {$gte: new Date()}
@@ -97,6 +106,14 @@ exports.createReservation = async (req, res, next) => {
         delete req.body.rating;
 
         const reservation = await Reservation.create(req.body);
+        
+        const subject = 'Reservation Confirmation';
+        const text = `Your reservation at ${restaurant.name} has been confirmed on ${reservation.date}`;
+        sendEmail(
+            req.user.email,
+            subject,
+            text
+        );
 
         res.status(201).json({ 
             success: true, 
@@ -175,6 +192,8 @@ exports.deleteReservation = async (req, res, next) => {
 
         await reservation.deleteOne();
 
+        await updateRestaurantRating(reservation.restaurant);
+
         res.status(200).json({ 
             success: true, 
             data: {} 
@@ -208,18 +227,29 @@ exports.updateRating = async (req, res, next) => {
                 message: 'User ' + req.user.id + ' is not authorized to update this reservation',
             });
         }
-
+        // Check if the reservation is finished
         if (reservation.date > new Date()) {
             return res.status(400).json({ 
                 success: false,
                 message: 'Cannot rate a reservation that is not finished',
             });
         }
-
+        // Check if the reservation is rated not after 3 days
+        const diffTime = Math.abs(new Date() - reservation.date);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays > 3) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Cannot rate a reservation that is rated after 3 days',
+            });
+        }
+        console.log(req.body.rating)
         reservation = await Reservation.findByIdAndUpdate(req.params.id, { rating: req.body.rating }, {
             new: true,
             runValidators: true
         });
+
+        await updateRestaurantRating(reservation.restaurant);
 
         res.status(200).json({ 
             success: true, 
@@ -232,4 +262,14 @@ exports.updateRating = async (req, res, next) => {
             message: 'Cannot update reservation'
         });
     }
+}
+
+const updateRestaurantRating = async (restaurantId) => {
+    const reservations = await Reservation.find({ restaurant: restaurantId, rating: {$gt: 0} });
+    const totalRating = reservations.reduce((acc, item) => acc + item.rating, 0);
+    const rating = totalRating / reservations.length;
+    await Restaurant.findByIdAndUpdate(restaurantId, { rating }, {
+        new: true,
+        runValidators: true
+    });
 }
