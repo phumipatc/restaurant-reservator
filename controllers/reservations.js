@@ -1,5 +1,6 @@
 const Reservation = require('../models/Reservation');
 const Restaurant = require('../models/Restaurant');
+const sendEmail = require('../config/mailer');
 
 //@desc		Get all reservations
 //@route	GET /api/v1/reservations
@@ -97,6 +98,14 @@ exports.createReservation = async (req, res, next) => {
         delete req.body.rating;
 
         const reservation = await Reservation.create(req.body);
+        
+        const subject = 'Reservation Confirmation';
+        const text = `Your reservation at ${restaurant.name} has been confirmed on ${reservation.date}`;
+        sendEmail({
+            email: req.user.email,
+            subject,
+            text
+        });
 
         res.status(201).json({ 
             success: true, 
