@@ -35,6 +35,11 @@ const restaurantSchema = new mongoose.Schema({
 			'Please add a valid time'
 		]
 	},
+	rating: {
+		type: Number,
+		min: [1, 'Rating must be at least 1'],
+		max: [5, 'Rating must can not be more than 5']
+	},
 }, { 
     toJSON: {virtuals:true}, 
     toObject:{virtuals:true} 

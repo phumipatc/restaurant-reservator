@@ -175,6 +175,8 @@ exports.deleteReservation = async (req, res, next) => {
 
         await reservation.deleteOne();
 
+        await updateRestaurantRating(reservation.restaurant);
+
         res.status(200).json({ 
             success: true, 
             data: {} 
@@ -215,11 +217,13 @@ exports.updateRating = async (req, res, next) => {
                 message: 'Cannot rate a reservation that is not finished',
             });
         }
-
+        console.log(req.body.rating)
         reservation = await Reservation.findByIdAndUpdate(req.params.id, { rating: req.body.rating }, {
             new: true,
             runValidators: true
         });
+
+        await updateRestaurantRating(reservation.restaurant);
 
         res.status(200).json({ 
             success: true, 
@@ -232,4 +236,14 @@ exports.updateRating = async (req, res, next) => {
             message: 'Cannot update reservation'
         });
     }
+}
+
+const updateRestaurantRating = async (restaurantId) => {
+    const reservations = await Reservation.find({ restaurant: restaurantId, rating: {$gt: 0} });
+    const totalRating = reservations.reduce((acc, item) => acc + item.rating, 0);
+    const rating = totalRating / reservations.length;
+    await Restaurant.findByIdAndUpdate(restaurantId, { rating }, {
+        new: true,
+        runValidators: true
+    });
 }

@@ -1,5 +1,5 @@
 const express = require('express');
-const { getReservations, getReservation, createReservation, updateReservation, deleteReservation } = require('../controllers/reservations');
+const { getReservations, getReservation, createReservation, updateReservation, deleteReservation, updateRating } = require('../controllers/reservations');
 const router = express.Router({ mergeParams: true });
 const { protect, authorize } = require('../middleware/auth');
 router.route("/")
@@ -10,5 +10,5 @@ router.route("/:id")
     .put(protect, authorize('admin', 'user'), updateReservation)
     .delete(protect, authorize('admin', 'user'), deleteReservation);
 router.route("/:id/rating")
-    .put(protect, authorize('admin', 'user'), updateReservation);
+    .put(protect, authorize('admin', 'user'), updateRating);
 module.exports = router;
