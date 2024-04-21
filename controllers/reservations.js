@@ -267,6 +267,9 @@ exports.updateRating = async (req, res, next) => {
 const updateRestaurantRating = async (restaurantId) => {
     const reservations = await Reservation.find({ restaurant: restaurantId, rating: {$gt: 0} });
     const totalRating = reservations.reduce((acc, item) => acc + item.rating, 0);
+    if (reservations.length === 0) {
+        return;
+    }
     const rating = totalRating / reservations.length;
     await Restaurant.findByIdAndUpdate(restaurantId, { rating }, {
         new: true,
