@@ -35,11 +35,6 @@ const restaurantSchema = new mongoose.Schema({
 			'Please add a valid time'
 		]
 	},
-	rating: {
-		type: Number,
-		min: [1, 'Rating must be at least 1'],
-		max: [5, 'Rating must can not be more than 5']
-	},
 }, { 
     toJSON: {virtuals:true}, 
     toObject:{virtuals:true} 
@@ -61,5 +56,17 @@ restaurantSchema.virtual('reservations', {
 	foreignField: 'restaurant', 
 	justOne: false 
 });
+
+restaurantSchema.virtual('averageRating').get(function(){
+	
+	if(this.reservations === undefined || this.reservations.length === 0){
+		return 0;
+	}
+	console.log('hi', this.reservations);
+	const ratings = this.reservations.map(reservation => reservation.rating).filter(rating => rating > 0);
+	console.log(ratings);
+	console.log(ratings.length);
+	return ratings.length > 0 ? ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length : 0;
+})
 
 module.exports = mongoose.model('Restaurant', restaurantSchema);

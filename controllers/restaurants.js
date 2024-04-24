@@ -14,7 +14,8 @@ exports.getRestaurants = async (req, res, next) => {
 
 		let queryStr = JSON.stringify(reqQuery);
 		queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
-		query = Restaurant.find(JSON.parse(queryStr));
+		query = Restaurant.find(JSON.parse(queryStr)).populate('reservations');
+
 
 		// Selecting fields
 		if (req.query.select) {
@@ -67,7 +68,7 @@ exports.getRestaurants = async (req, res, next) => {
 //@access	Public
 exports.getRestaurant = async (req, res, next) => {
 	try {
-		const restaurant = await Restaurant.findById(req.params.id);
+		const restaurant = await Restaurant.findById(req.params.id).populate('reservations');
 
 		if (!restaurant) {
 			return res.status(400).json({ success: false });

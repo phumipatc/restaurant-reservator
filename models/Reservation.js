@@ -17,8 +17,9 @@ const ReservationSchema = new mongoose.Schema({
     },
     rating: {
         type: Number,
-        min: 1,
-        max: 5
+        min: 0, // 0 means not rated yet
+        max: 5,
+        default: 0
     },
 });
 

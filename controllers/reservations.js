@@ -82,8 +82,15 @@ exports.createReservation = async (req, res, next) => {
         }
 
         req.body.user = req.user.id;
-
-        // Check if the user's reservation is not in the past (disabled for testing purpose)
+        
+        if(!Date.parse(req.body.date)){
+            return res.status(400).json({
+                success: false,
+                message: 'Please enter a valid date'
+            });
+        }
+    
+            // Check if the user's reservation is not in the past (disabled for testing purpose)
         if (Date.parse(req.body.date) < new Date()) {
             return res.status(400).json({
                 success: false,
@@ -192,8 +199,6 @@ exports.deleteReservation = async (req, res, next) => {
 
         await reservation.deleteOne();
 
-        await updateRestaurantRating(reservation.restaurant);
-
         res.status(200).json({ 
             success: true, 
             data: {} 
@@ -221,7 +226,7 @@ exports.updateRating = async (req, res, next) => {
             });
         }
 
-        if (reservation.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        if (req.user.role !== 'admin' && reservation.user.toString() !== req.user.id) {
             return res.status(401).json({ 
                 success: false,
                 message: 'User ' + req.user.id + ' is not authorized to update this reservation',
@@ -243,13 +248,12 @@ exports.updateRating = async (req, res, next) => {
                 message: 'Cannot rate a reservation that is rated after 3 days',
             });
         }
-        console.log(req.body.rating)
+
+        // can be set to 0 to remove rating
         reservation = await Reservation.findByIdAndUpdate(req.params.id, { rating: req.body.rating }, {
             new: true,
             runValidators: true
         });
-
-        await updateRestaurantRating(reservation.restaurant);
 
         res.status(200).json({ 
             success: true, 
@@ -262,17 +266,4 @@ exports.updateRating = async (req, res, next) => {
             message: 'Cannot update reservation'
         });
     }
-}
-
-const updateRestaurantRating = async (restaurantId) => {
-    const reservations = await Reservation.find({ restaurant: restaurantId, rating: {$gt: 0} });
-    const totalRating = reservations.reduce((acc, item) => acc + item.rating, 0);
-    if (reservations.length === 0) {
-        return;
-    }
-    const rating = totalRating / reservations.length;
-    await Restaurant.findByIdAndUpdate(restaurantId, { rating }, {
-        new: true,
-        runValidators: true
-    });
 }
