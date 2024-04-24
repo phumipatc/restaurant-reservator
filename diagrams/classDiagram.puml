@@ -1,4 +1,4 @@
-@startuml
+@startuml Restaurant reservator
 left to right direction
 package "Restaurant reservator"{
     class "<<Application>>\nRestaurant reservator Service" as RestaurantReservatorService{}
