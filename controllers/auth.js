@@ -113,17 +113,23 @@ exports.forgotPassword = async (req, res, next) => {
 		return res.status(404).json({ success: false, error: 'User not found' });
 	}
 
-	const newPassword = Math.random().toString(36).slice(-8);
-	console.log(newPassword);
+	try {
+		const newPassword = Math.random().toString(36).slice(-8);
+		// console.log(newPassword);
 
-	const subject = 'Password reset';
-	const text = `Your new password is ${newPassword}`;
-	sendEmail(email, subject, text);
-	
-	user.password = newPassword;
+		const subject = 'Password reset';
+		const text = `Your new password is ${newPassword}`;
 
-	await user.save();
-	res.status(200).json({ success: true, data: 'Email sent' });
+		await sendEmail(email, subject, text);
+		
+		user.password = newPassword;
+		await user.save();
+		
+		res.status(200).json({ success: true, data: 'Email sent' });
+	} catch(err) {
+		console.log(err);
+		return res.status(500).json({ success: false, error: 'Email not sent' });
+	}
 }
 
 // @desc	Change password

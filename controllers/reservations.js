@@ -116,7 +116,7 @@ exports.createReservation = async (req, res, next) => {
         
         const subject = 'Reservation Confirmation';
         const text = `Your reservation at ${restaurant.name} has been confirmed on ${reservation.date}`;
-        sendEmail(
+        await sendEmail(
             req.user.email,
             subject,
             text
