@@ -23,13 +23,7 @@ function sendEmail(email, subject, text) {
 	};
 	// console.log(mailData);
 
-	transporter.sendMail(mailData, (err, info) => {
-		if (err) {
-			console.log(err);
-		} else {
-			console.log('Email sent');
-		}
-	});
+	return transporter.sendMail(mailData);
 }
 
 module.exports = sendEmail;
