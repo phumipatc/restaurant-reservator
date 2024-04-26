@@ -1,0 +1,41 @@
+@startuml Get All Reservations (Get)
+
+' header Sameple VacQ Sequence Diagram
+' footer Page %page% of %lastpage%
+title "Get All Reservations (Get)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:reservations" as reservationsRouter
+participant "<<controllers>>\n:reservations" as reservationsController
+participant "<<model>>\n:Reservation" as reservationModel
+database "<<MongoDB>>\n:reservations" as ReservationsDatabase
+database "<<MongoDB>>\n:restaurants" as RestaurantsDatabase
+
+client->server ++:req.get('/reservations')
+server->reservationsRouter ++:app.use('/reservations',reservationsRouter)
+
+alt req.user.role != 'admin'
+
+    reservationsRouter -> reservationsController ++:getReservations()
+    reservationsController->reservationModel ++:find(req.user.id)
+    reservationModel ->ReservationsDatabase ++: ReservationSchema
+    ReservationsDatabase --> reservationModel --: reservations
+    reservationModel --> reservationsController --: reservations
+
+else else
+
+    reservationsRouter -> reservationsController ++:getReservations()
+    reservationsController->reservationModel ++:find()
+    reservationModel ->ReservationsDatabase ++: ReservationSchema
+    ReservationsDatabase --> reservationModel --: reservations
+    reservationModel --> reservationsController --: reservations
+
+end
+
+reservationsController -> reservationModel ++: populate('restaurant')
+reservationModel -> RestaurantsDatabase ++: RestaurantSchema
+RestaurantsDatabase --> reservationModel --: restaurant
+reservationModel --> reservationsController --: reservations
+reservationsController-->client --:response
+@enduml

@@ -1,0 +1,36 @@
+@startuml Create Reservation (POST)
+
+' header Sameple VacQ Sequence Diagram
+' footer Page %page% of %lastpage%
+title "Create Reservation (POST)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:reservations" as reservationsRouter
+participant "<<controllers>>\n:reservations" as reservationsController
+participant "<<model>>\n:Restaurant" as restaurantModel
+database "<<MongoDB>>\n:restaurants" as RestaurantsDatabase
+participant "<<model>>\n:Reservation" as reservationModel
+database "<<MongoDB>>\n:reservations" as ReservationsDatabase
+participant "<<controllers>>\n:mailer" as mailerController
+
+client->server ++:req.post('/reservations/')
+server->reservationsRouter ++:app.use('/reservations',reservationsRouter)
+reservationsRouter -> reservationsController ++:createReservation()
+reservationsController ->restaurantModel ++:findById(req.params.restaurantId)
+restaurantModel ->RestaurantsDatabase ++: RestaurantSchema
+RestaurantsDatabase --> restaurantModel --: restaurant
+restaurantModel --> reservationsController --:restaurant
+reservationsController -> reservationModel ++:find({user,date})
+reservationModel ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> reservationModel --: reservation
+reservationModel --> reservationsController --:reservation
+reservationsController->reservationModel ++:create(req.body)
+reservationModel ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> reservationModel --: reservation
+reservationModel --> reservationsController --:reservation
+reservationsController -> mailerController ++:sendEmail(req.user.email)
+mailerController --> reservationsController --:response
+reservationsController-->client --:response
+
+@enduml
