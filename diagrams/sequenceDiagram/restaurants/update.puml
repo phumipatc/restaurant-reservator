@@ -1,0 +1,23 @@
+@startuml Update Restaurant (PUT)
+
+' header Sameple VacQ Sequence Diagram
+' footer Page %page% of %lastpage%
+title "Update Restaurant (PUT)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:restaurants" as restaurantsRouter
+participant "<<controllers>>\n:restaurants" as restaurantsController
+participant "<<model>>\n:Restaurant" as restaurantModel
+database "<<MongoDB>>\n:restaurants" as RestaurantsDatabase
+
+client->server ++:req.put('/restaurants/:id')
+server->restaurantsRouter ++:app.use('/restaurants',restaurantsRouter)
+restaurantsRouter->restaurantsController ++:updateRestaurant()
+restaurantsController->restaurantModel ++:findByIdAndUpdate(req.params.id, req.body)
+restaurantModel ->RestaurantsDatabase ++: RestaurantSchema
+RestaurantsDatabase --> restaurantModel --: restaurant
+restaurantModel --> restaurantsController --: restaurant
+restaurantsController --> client --: response
+
+@enduml

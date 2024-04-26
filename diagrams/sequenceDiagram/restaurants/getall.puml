@@ -1,0 +1,28 @@
+@startuml Get All Restaurants (Get)
+
+' header Sameple VacQ Sequence Diagram
+' footer Page %page% of %lastpage%
+title "Get All Restaurants (Get)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:restaurants" as restaurantsRouter
+participant "<<controllers>>\n:restaurants" as restaurantsController
+participant "<<model>>\n:Restaurant" as restaurantModel
+database "<<MongoDB>>\n:restaurants" as RestaurantsDatabase
+database "<<MongoDB>>\n:reservations" as ReservationsDatabase
+
+client->server ++:req.get('/restaurants')
+server->restaurantsRouter ++:app.use('/restaurants',restaurantsRouter)
+restaurantsRouter -> restaurantsController ++:getRestaurants()
+restaurantsController->restaurantModel ++:find(req.query)
+restaurantModel ->RestaurantsDatabase ++: RestaurantSchema
+RestaurantsDatabase --> restaurantModel --: restaurants
+restaurantModel -->restaurantsController --:restaurants
+restaurantsController ->restaurantModel ++: populate('reservations')
+restaurantModel ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> restaurantModel --: reservations
+restaurantsController <-- restaurantModel --:restaurants
+restaurantsController-->client --:response
+
+@enduml
