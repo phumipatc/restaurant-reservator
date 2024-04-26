@@ -1,0 +1,60 @@
+@startuml Restaurant Reservation System Use Case Diagram
+left to right direction
+actor "User" as u
+' rectangle "Restaurant Reservation System" {
+'     usecase "Get All Restaurants" as getAllRestaurants
+'     usecase "Get Single Restaurant" as getSingleRestaurant
+'     usecase "Create Restaurant" as createRestaurant
+'     usecase "Update Restaurant" as updateRestaurant
+'     usecase "Delete Restaurant" as deleteRestaurant
+' }
+
+package "Restaurant Management" as RestaurantManagement {
+    usecase "Get All Restaurants" as getAllRestaurants
+    usecase "Get Single Restaurant" as getSingleRestaurant
+    usecase "Create Restaurant" as createRestaurant
+    usecase "Update Restaurant" as updateRestaurant
+    usecase "Delete Restaurant" as deleteRestaurant
+}
+package "Reservation Management" as ReservationManagement {
+    usecase "Get All Reservations" as getAllReservations
+    usecase "Get Single Reservation" as getSingleReservation
+    usecase "Create Reservation" as createReservation
+    usecase "Update Reservation" as updateReservation
+    usecase "Delete Reservation" as deleteReservation
+    usecase "Update Rating" as updateRating
+}
+package "User Management" as UserManagement {
+    usecase "Register" as register
+    usecase "Login" as login
+    usecase "Logout" as logout
+    usecase "Get Profile" as getProfile
+    usecase "Forgot Password" as forgotPassword
+    usecase "Change Password" as changePassword
+}
+u -- (getAllRestaurants)
+u -- (getSingleRestaurant)
+u -- (ReservationManagement)
+' u -- (getAllReservations)
+' u -- (getSingleReservation)
+' u -- (createReservation)
+' u -- (updateReservation)
+' u -- (deleteReservation)
+' u -- (updateRating)
+u -- (UserManagement)
+
+actor "Admin" as a
+(getAllRestaurants) -- a
+(getSingleRestaurant) -- a
+(createRestaurant) -- a
+(updateRestaurant) -- a
+(deleteRestaurant) -- a
+(ReservationManagement) -- a
+' (getAllReservations) -- a
+' (getSingleReservation) -- a
+' (createReservation) -- a
+' (updateReservation) -- a
+' (deleteReservation) -- a
+' (updateRating) -- a
+(UserManagement) -- a
+@enduml
