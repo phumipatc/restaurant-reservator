@@ -1,0 +1,26 @@
+@startuml Logout (GET)
+title "Logout (GET)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:auth" as authRouter
+participant "<<middleware>>\n:auth" as authMiddleware
+participant "<<service>>\n:jwt" as jwtService
+participant "<<controller>>\n:auth" as authController
+participant "<<model>>\n:User" as userModel
+database "<<MongoDB>>\n:users" as users
+
+client -> server ++:req.post('/auth/logout')
+server -> authRouter ++:app.use('/auth', authRouter)
+
+authRouter -> authMiddleware ++:protect()
+authMiddleware -> jwtService ++:verify(token)
+jwtService --> authMiddleware --:decoded
+authMiddleware -> userModel ++:findById(decoded.id)
+userModel -> users ++:UserSchema
+users --> userModel --:user
+userModel --> authMiddleware --:user
+authMiddleware -> authRouter --:next()
+
+authRouter -> authController ++:logout()
+authController --> client --:response

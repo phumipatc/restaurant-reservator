@@ -1,0 +1,23 @@
+@startuml Register (POST)
+title "Register (POST)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:auth" as authRouter
+participant "<<controller>>\n:auth" as authController
+participant "<<model>>\n:User" as userModel
+database "<<MongoDB>>\n:users" as users
+
+client -> server ++:req.post('/auth/register')
+server -> authRouter ++:app.use('/auth', authRouter)
+authRouter -> authController ++:register()
+authController -> userModel ++:create(req.body)
+userModel -> users ++:UserSchema
+users --> userModel --:user
+userModel --> authController --:user
+
+' sendTokenResponse
+authController -> authController ++:sendTokenResponse(user, 200, res)
+authController -> userModel ++:getSignedJwtToken()
+userModel --> authController --:token
+authController --> client --:response
